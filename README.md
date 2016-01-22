@@ -1,2 +1,2 @@
 # JavaScript
-Домашние работы по уроку http://geekbrains.ru/courses/6
+Домашние работы по курсу http://geekbrains.ru/courses/6
