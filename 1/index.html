@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<title>Document</title>
+	<style>
+		* { margin: 0; padding: 0; }
+		#matrix { margin: 40px; width: 420px; border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; }
+		#matrix:after { content: ' '; display: block; clear: both; }
+		#matrix .cell { float: left; width: 21px; height: 21px; box-sizing: border-box; border-left: 1px solid #ccc; border-top: 1px solid #ccc; }
+	</style>
+	<script>
+		// Создание матрицы
+		var createMatrix = function(sideLength) {
+			this.sideLength = sideLength;
+			var body = document.getElementsByTagName('body')[0];
+			var matrix = document.createElement('div');
+			matrix.id = 'matrix';
+			body.appendChild(matrix);
+
+			for (var i = 0; i < sideLength*sideLength; i++) {
+				var div = document.createElement('div');
+				div.className = 'cell';
+				matrix.appendChild(div);
+			}
+		};
+
+		// Чтение ячейки матрицы
+		var getCell = function(row, col) {
+			// Принимает координаты ячейки,
+			// возвращает true, если закрашена
+			// и false, если не закрашена.
+			var cell = matrix.childNodes[sideLength * (row - 1) + col - 1];
+			if (cell.classList.contains('active')) {
+				return true;
+			};
+			return false;
+		};
+
+		// Переключение ячейки матрицы
+		var setCell = function(row, col) {
+			// Принимает координаты ячейки,
+			// если ячейка закрашина, убирает закраску
+			// иначе закрашивает ячейку.
+			var cell = matrix.childNodes[sideLength * (row - 1) + col - 1];
+			cell.classList.toggle('active');
+		};
+
+		// Установка ячейки матрицы
+		var setCell = function(row, col, val) {
+			// Принимает координаты ячейки,
+			// если val == true, закрашивает,
+			// иначе убирает закраску.
+			var cell = matrix.childNodes[sideLength * (row - 1) + col - 1];
+			if (val) {
+				cell.classList.add('active');
+			} else {
+				cell.classList.remove('active');
+			};
+		};
+
+		// Точка входа
+		window.onload = function() {
+			createMatrix(20);
+			setCell(1, 1, true);
+			getCell(1, 1);
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>
