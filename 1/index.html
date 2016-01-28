@@ -11,28 +11,6 @@
 		#matrix .cell.active { background-color: #ccc; }
 	</style>
 	<script>
-		var keyHandler = function(keyCode, coords) {
-			if (keyCode == 37 || keyCode == 38 || keyCode == 39 || keyCode == 40) {
-				toggleCell(coords[0], coords[1]);
-				switch (keyCode) {
-					case 37:
-						coords[1]--;
-						break;
-					case 38:
-						coords[0]--;
-						break;
-					case 39:
-						coords[1]++;
-						break;
-					case 40:
-						coords[0]++;
-						break;
-				};
-				toggleCell(coords[0], coords[1]);
-				return coords;
-			};
-		};
-
 		// Создание матрицы
 		var createMatrix = function(sideLength) {
 			this.sideLength = sideLength;
@@ -54,14 +32,6 @@
 			return matrix.childNodes[cellIndex];
 		};
 
-		// Чтение ячейки матрицы - УДАЛИТЬ, ЕСЛИ НЕ БУДЕТ ИСПОЛЬЗОВАНА!!!
-		var readCell = function(row, col) {
-			// Принимает координаты ячейки,
-			// возвращает true, если закрашена
-			// и false, если не закрашена.
-			var cell = getCell(row, col);
-			return cell.classList.contains('active');
-		};
 
 		// Переключение ячейки матрицы
 		var toggleCell = function(row, col) {
@@ -72,35 +42,51 @@
 			cell.classList.toggle('active');
 		};
 
-		// Установка ячейки матрицы - УДАЛИТЬ, ЕСЛИ НЕ БУДЕТ ИСПОЛЬЗОВАНА!!!
-		var setCell = function(row, col, val) {
-			// Принимает координаты ячейки,
-			// если val == true, закрашивает,
-			// иначе убирает закраску.
-			var cell = getCell(row, col);
-			if (val) {
-				cell.classList.add('active');
-			} else {
-				cell.classList.remove('active');
+		// Проверка на смерть
+		var crashed = function(row, col) {
+		};
+
+		var snakeDirection = 39; // Глобальная
+
+		var snakeMove = function(row, col) {
+			toggleCell(row, col);
+			switch (snakeDirection) {
+				case 37:
+					col--;
+					break;
+				case 38:
+					row--;
+					break;
+				case 39:
+					col++;
+					break;
+				case 40:
+					row++;
+					break;
 			};
+			toggleCell(row, col);
+			setTimeout(snakeMove, 800, row, col);
+		};
+
+		var init = function() {
+			createMatrix(20);
+			startRow = 4;
+			startCol = 4;
+			toggleCell(startRow, startCol);
+			setTimeout(snakeMove, 800, startRow, startCol);
 		};
 
 		// Точка входа
 		window.onload = function() {
-			createMatrix(20);
-			toggleCell(4, 4);
-
-			// Инициализация - ВЫНЕСТИ В ОТДЕЛЬНУЮ ФУНКЦИЮ!!!
-			var row = 4;
-			var col = 4;
+			init();
 
 			// Обработка нажатия клавиш
 			document.onkeydown = function(event) {
 				if (!event) event = window.event;
 				var keyCode = event.keyCode || event.which;
-				coords = keyHandler(keyCode, [row, col]);
-				row = coords[0];
-				col = coords[1];
+				if (keyCode == 37 || keyCode == 38 || keyCode == 39 || keyCode == 40) {
+					snakeDirection = keyCode;
+				};
 			};
 		};
 	</script>
