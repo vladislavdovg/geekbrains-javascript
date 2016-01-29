@@ -2,21 +2,39 @@
 <html lang="ru">
 <head>
 	<meta charset="utf-8">
-	<title>Document</title>
+	<title>Змейка</title>
 	<style>
 		* { margin: 0; padding: 0; }
-		#matrix { margin: 100px auto; width: 420px; border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; }
+		body { position: relative; padding: 150px 0; font-family: Tahoma, Arial, sans-serif; }
+		#information { position: absolute; top: 100px; left: 0; width: 100%; font: bold 1.4em "Courier New", monospace; text-align: center; text-transform: uppercase; }
+		#matrix { margin: 0 auto; width: 420px; border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; }
 		#matrix:after { content: ' '; display: block; clear: both; }
 		#matrix .cell { float: left; width: 21px; height: 21px; box-sizing: border-box; border-left: 1px solid #ccc; border-top: 1px solid #ccc; }
-		#matrix .cell.active { background-color: #ccc; }
+		#matrix .cell.snake { background-color: #ccc; }
+		#matrix .cell.food { background-color: #eee; }
 	</style>
 	<script>
+		var randomInt = function(min, max) {
+			var rand = min + Math.random() * (max - min)
+			rand = Math.round(rand);
+			return rand;
+		};
+
+		var snakeProperties = function(moveInterval, direction, directionWritable) {
+			this.snakeMoveInterval = moveInterval;
+			this.snakeDirection = direction;
+			this.snakeDirectionWritable = directionWritable;
+		};
+
 		// Создание матрицы
 		var createMatrix = function(sideLength) {
 			this.sideLength = sideLength;
-			var body = document.getElementsByTagName('body')[0];
+			var body = document.querySelector('body');
+			var information = document.createElement('p');
+			information.id = 'information';
 			var matrix = document.createElement('div');
 			matrix.id = 'matrix';
+			body.appendChild(information);
 			body.appendChild(matrix);
 
 			for (var i = 0; i < sideLength*sideLength; i++) {
@@ -32,48 +50,84 @@
 			return matrix.childNodes[cellIndex];
 		};
 
-
-		// Переключение ячейки матрицы
-		var toggleCell = function(row, col) {
-			// Принимает координаты ячейки,
-			// если ячейка закрашина, убирает закраску
-			// иначе закрашивает ячейку.
+		// Добавляет или убирает класс с ячейки матрицы
+		var toggleCell = function(row, col, cellClass) {
 			var cell = getCell(row, col);
-			cell.classList.toggle('active');
+			cell.classList.toggle(cellClass || 'snake');
 		};
 
-		// Проверка на смерть
-		var crashed = function(row, col) {
+		// Создание еды
+		var createFood = function(row, col) {
+			var randomRow = randomInt(1, sideLength);
+			var randomCol = randomInt(1, sideLength);
+			// Если координаты еды совпадают с координатами змейки, создаем еще раз
+			if (randomRow === row && randomCol === col) {
+				createFood(row, col);
+			};
+			// Если на поле уже есть еда, убираем ее
+			if (this.foodCoords) {
+				toggleCell(foodCoords[0], foodCoords[1], 'food');
+			};
+			this.foodCoords = [randomRow, randomCol];
+			toggleCell(randomRow, randomCol, 'food');
 		};
 
-		var snakeDirection = 39; // Глобальная
+		var gameOver = function(row, col) {
+			information.innerHTML = 'Game Over';
+			setInterval(toggleCell, 100, row, col);
+		};
 
 		var snakeMove = function(row, col) {
 			toggleCell(row, col);
 			switch (snakeDirection) {
 				case 37:
+					if (col === 1) {
+						gameOver(row, col);
+						return false;
+					};
 					col--;
 					break;
 				case 38:
+					if (row === 1) {
+						gameOver(row, col);
+						return false;
+					};
 					row--;
 					break;
 				case 39:
+					if (col === 20) {
+						gameOver(row, col);
+						return false;
+					};
 					col++;
 					break;
 				case 40:
+					if (row === 20) {
+						gameOver(row, col);
+						return false;
+					};
 					row++;
 					break;
 			};
 			toggleCell(row, col);
-			setTimeout(snakeMove, 800, row, col);
+			if (foodCoords[0] === row && foodCoords[1] === col) {
+				createFood(row, col);
+				information.innerHTML = 'Ном';
+				setTimeout(function() { information.innerHTML = ''; }, snakeMoveInterval);
+			};
+			snakeDirectionWritable = true;
+			setTimeout(snakeMove, snakeMoveInterval, row, col);
 		};
 
 		var init = function() {
 			createMatrix(20);
+			snakeProperties(400, 39, false);
 			startRow = 4;
 			startCol = 4;
 			toggleCell(startRow, startCol);
-			setTimeout(snakeMove, 800, startRow, startCol);
+			createFood(startRow, startCol);
+			setTimeout(snakeMove, snakeMoveInterval, startRow, startCol);
+			console.log(foodCoords);
 		};
 
 		// Точка входа
@@ -84,8 +138,11 @@
 			document.onkeydown = function(event) {
 				if (!event) event = window.event;
 				var keyCode = event.keyCode || event.which;
-				if (keyCode == 37 || keyCode == 38 || keyCode == 39 || keyCode == 40) {
+				if ((((keyCode === 37 || keyCode === 39) && (snakeDirection === 38 || snakeDirection === 40))
+				|| ((keyCode === 38 || keyCode === 40) && (snakeDirection === 37 || snakeDirection === 39)))
+				&& snakeDirectionWritable) {
 					snakeDirection = keyCode;
+					snakeDirectionWritable = false;
 				};
 			};
 		};
