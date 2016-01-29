@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<title>Document</title>
+	<style>
+		* { margin: 0; padding: 0; }
+		#matrix { margin: auto; width: 420px; border-right: 1px solid #ccc; border-bottom: 1px solid #ccc; }
+		#matrix:after { content: ' '; display: block; clear: both; }
+		#matrix .cell { float: left; width: 21px; height: 21px; box-sizing: border-box; border-left: 1px solid #ccc; border-top: 1px solid #ccc; }
+		#matrix .cell.active { background-color: #ccc; }
+	</style>
+</head>
+<body>
+	<script>
+		var Matrix = function(id, rows, cols) {
+			this.id = id;
+			this.rows = rows;
+			this.cols = cols;
+
+			this.create = function() {
+				var matrix = document.getElementById(this.id);
+				var cellsQty = this.rows * this.cols;
+
+				matrix.innerHTML = '';
+
+				for (var i = 0; i < cellsQty; i++) {
+					var div = document.createElement('div');
+					div.className = 'cell';
+					matrix.appendChild(div);
+				};
+			};
+
+			this.getCell = function(row, col) {
+				var cellIndex = cellsQty * (row - 1) + col - 1;
+				return matrix.childNodes[cellIndex];
+			};
+		};
+
+		var Snake = function(row, col, direction) {
+			this.body = [row, col];
+			this.direction = direction;
+			var that = this;
+
+			this.create = function() {
+				field.toggleCell(that.body[0], that.body[1]);
+			};
+
+			this.move = function() {
+				var lastBody = that.body.slice();
+
+				switch(that.direction) {
+					case 'top':
+						that.body[0]--;
+						break;
+					case 'right':
+						that.body[1]--;
+						break;
+					case 'bottom':
+						that.body[0]++;
+						break;
+					case 'left':
+						that.body[1]++;
+						break;
+				};
+
+				field.toggleCell(lastBody[0], lastBody[1]);
+				field.toggleCell(that.body[0], that.body[1]);
+			};
+		};
+
+		// Точка входа
+		window.onload = function() {
+			var field = new Matrix('matrix', 20, 20);
+			field.create();
+			fiels.setCell(4, 4);
+		};
+	</script>
+</body>
+</html>
